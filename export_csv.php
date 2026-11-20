@@ -1,0 +1,4 @@
+<?php
+// Run after importing database.sql, while logged in; download each table CSV.
+require_once 'common.php';$tables=['representatives','clients','representative_clients','client_personal_info','moving_events','special_instructions'];$table=$_GET['table']??'';if(!in_array($table,$tables,true)){pageStart('Export Database CSV');echo '<p>Download each table after importing database.sql:</p><ul>';foreach($tables as $t)echo '<li><a href="export_csv.php?table='.h($t).'">'.h($t).'.csv</a></li>';echo '</ul>';pageEnd();exit;}
+header('Content-Type: text/csv; charset=utf-8');header('Content-Disposition: attachment; filename="'.$table.'.csv"');$out=fopen('php://output','w');$st=$pdo->query('SELECT * FROM `'.$table.'`');$first=$st->fetch(PDO::FETCH_ASSOC);if($first){fputcsv($out,array_keys($first));fputcsv($out,$first);while($row=$st->fetch(PDO::FETCH_ASSOC))fputcsv($out,$row);}fclose($out);

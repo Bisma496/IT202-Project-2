@@ -1,0 +1,1 @@
+<?php header('Location: search_account.php');exit; ?>

@@ -1,0 +1,8 @@
+<?php
+require_once 'common.php';$msg='';
+if($_SERVER['REQUEST_METHOD']==='POST')try{
+ $id=filter_var($_POST['client_id']??'',FILTER_VALIDATE_INT);$first=trim($_POST['first_name']??'');$last=trim($_POST['last_name']??'');$street=trim($_POST['street_number']??'');$name=trim($_POST['street_name']??'');$city=trim($_POST['city']??'');$state=strtoupper(trim($_POST['state']??''));$zip=trim($_POST['zip_code']??'');$phone=trim($_POST['phone']??'');
+ if(!$id||!$first||!$last||!$street||!$name||!$city||!preg_match('/^[A-Z]{2}$/',$state)||!preg_match('/^\d{5}(-\d{4})?$/',$zip)||!$phone)throw new Exception('Please enter valid information in all fields.');
+ $pdo->beginTransaction();$st=$pdo->prepare('INSERT INTO clients VALUES (?,?,?)');$st->execute([$id,$first,$last]);$pdo->prepare('INSERT INTO client_personal_info VALUES (?,?,?,?,?,?,?)')->execute([$id,$street,$name,$city,$state,$zip,$phone]);$pdo->prepare('INSERT INTO representative_clients VALUES (?,?)')->execute([$repId,$id]);$pdo->commit();$msg='New client account created successfully.';
+}catch(Throwable $e){if($pdo->inTransaction())$pdo->rollBack();$msg='Could not create client. Check that the ID is unique and fields are valid.';}
+pageStart('Create New Client Account');if($msg)message($msg);echo '<form method="post">';foreach([['client_id','Unique Client ID','number'],['first_name','First Name'],['last_name','Last Name'],['street_number','Street Number'],['street_name','Street Name'],['city','City'],['state','State (2 letters)'],['zip_code','ZIP Code'],['phone','Phone Number']] as $f)field($f[0],$f[1],$f[2]??'text');submit('Create Client');pageEnd();
